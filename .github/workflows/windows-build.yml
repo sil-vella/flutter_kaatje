@@ -14,6 +14,23 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
+    - name: Install Chocolatey
+      run: |
+        Set-ExecutionPolicy Bypass -Scope Process -Force
+        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+        iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+    
+    - name: Install Dart SDK
+      run: |
+        Write-Host "Installing Dart SDK version 3.4.0..."
+        choco install dart-sdk --version=3.4.0 -y
+        $dartPath = "$env:ChocolateyInstall\lib\dart-sdk\tools"
+        [System.Environment]::SetEnvironmentVariable("Path", $dartPath + ";" + [System.Environment]::GetEnvironmentVariable("Path", [System.EnvironmentVariableTarget]::Process), [System.EnvironmentVariableTarget]::Machine)
+        echo "$dartPath" >> $env:GITHUB_PATH
+        Write-Host "Added Dart SDK path: $dartPath"
+        $dartVersion = dart --version
+        Write-Host "Dart SDK version $dartVersion installed successfully"
+    
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
