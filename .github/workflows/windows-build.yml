@@ -17,7 +17,15 @@ jobs:
     - name: Install Dart SDK
       run: |
         choco install dart-sdk --version=3.4.0 -y
-        echo "$env:ChocolateyInstall\bin" >> $env:GITHUB_PATH
+        $dartPath = "$env:ChocolateyInstall\lib\dart-sdk\tools"
+        echo "$dartPath" >> $env:GITHUB_PATH
+        echo "Added Dart SDK path: $dartPath"
+    
+    - name: Validate Dart Path
+      run: |
+        if (!(Test-Path "$env:ChocolateyInstall\lib\dart-sdk\tools\dart.exe")) {
+          Write-Error "Dart executable not found in expected path."
+        }
     
     - name: Verify Dart version
       run: dart --version
