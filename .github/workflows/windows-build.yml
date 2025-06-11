@@ -90,6 +90,28 @@ jobs:
     - name: Build Windows app
       run: flutter build windows --release
     
+    - name: Setup MSIX packaging
+      run: |
+        Write-Host "Setting up MSIX packaging..."
+        flutter pub add msix
+        flutter pub get
+    
+    - name: Configure MSIX
+      run: |
+        Write-Host "Configuring MSIX..."
+        flutter pub run msix:create --display-name "Kaatje" --publisher-display-name "Your Publisher Name" --identity-name "com.yourdomain.kaatje" --publisher "CN=YourPublisherID" --logo "assets/images/icon.png" --version "1.0.0.0"
+    
+    - name: Create MSIX package
+      run: |
+        Write-Host "Creating MSIX package..."
+        flutter pub run msix:create
+    
+    - name: Upload MSIX package
+      uses: actions/upload-artifact@v3
+      with:
+        name: windows-msix
+        path: build/windows/msix/*.msix
+    
     - name: Upload Windows Build
       uses: actions/upload-artifact@v4
       with:
