@@ -25,9 +25,16 @@ jobs:
         Write-Host "Installing Dart SDK version 3.4.0..."
         choco install dart-sdk --version=3.4.0 -y
         $dartPath = "$env:ChocolateyInstall\lib\dart-sdk\tools"
-        [System.Environment]::SetEnvironmentVariable("Path", $dartPath + ";" + [System.Environment]::GetEnvironmentVariable("Path", [System.EnvironmentVariableTarget]::Process), [System.EnvironmentVariableTarget]::Machine)
+        [System.Environment]::SetEnvironmentVariable("Path", "$dartPath;$env:GITHUB_PATH", [System.EnvironmentVariableTarget]::Machine)
         echo "$dartPath" >> $env:GITHUB_PATH
         Write-Host "Added Dart SDK path: $dartPath"
+        
+        # Verify Dart installation
+        if (!(Get-Command dart -ErrorAction SilentlyContinue)) {
+            Write-Error "Dart command not found after installation."
+            exit 1
+        }
+        
         $dartVersion = dart --version
         Write-Host "Dart SDK version $dartVersion installed successfully"
     
