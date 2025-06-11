@@ -54,17 +54,15 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.19.0'
+        flutter-version: '3.19.3'  # This version includes Dart 3.4.0
         channel: 'stable'
         cache: true
-        dart-version: '3.4.0'  # Specify Dart version explicitly
     
-    - name: Configure Flutter to use system Dart
+    - name: Configure Flutter
       run: |
-        Write-Host "Configuring Flutter to use system Dart..."
+        Write-Host "Configuring Flutter..."
         flutter config --no-analytics
         flutter config --no-cli-animations
-        flutter config --dart-sdk "C:\tools\dart-sdk"
     
     - name: Verify Flutter and Dart versions
       run: |
