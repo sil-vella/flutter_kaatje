@@ -5,7 +5,6 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-  workflow_dispatch:  # Allows manual triggering
 
 jobs:
   build:
@@ -13,108 +12,17 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Install Chocolatey
+
+    - name: Build Docker image
       run: |
-        Set-ExecutionPolicy Bypass -Scope Process -Force
-        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-        iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-    
-    - name: Install Dart SDK
+        docker build -t flutter-windows-builder .
+
+    - name: Run build in container
       run: |
-        Write-Host "Installing Dart SDK version 3.4.0..."
-        choco install dart-sdk --version=3.4.0 -y
-        refreshenv
-        
-        # Set the correct Dart SDK path
-        $dartPath = "C:\tools\dart-sdk\bin"
-        
-        # Add Dart SDK path to the current session and system PATH
-        $env:Path = "$dartPath;$env:Path"
-        [System.Environment]::SetEnvironmentVariable("Path", "$dartPath;$env:Path", [System.EnvironmentVariableTarget]::Machine)
-        
-        Write-Host "Added Dart SDK path: $dartPath"
-        
-        # Verify Dart installation
-        if (!(Get-Command dart -ErrorAction SilentlyContinue)) {
-            Write-Host "Current PATH: $env:Path"
-            Write-Host "Checking if dart.exe exists at $dartPath"
-            if (Test-Path "$dartPath\dart.exe") {
-                Write-Host "dart.exe found at $dartPath"
-            } else {
-                Write-Host "dart.exe not found at $dartPath"
-            }
-            Write-Error "Dart command not found after installation."
-            exit 1
-        }
-        
-        $dartVersion = dart --version
-        Write-Host "Dart SDK version $dartVersion installed successfully"
-    
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: '3.19.3'
-        channel: 'stable'
-        cache: true
-    
-    - name: Configure Flutter
-      run: |
-        Write-Host "Configuring Flutter..."
-        flutter config --no-analytics
-        flutter config --no-cli-animations
-    
-    - name: Verify Flutter and Dart versions
-      run: |
-        Write-Host "Checking Flutter version..."
-        flutter --version
-        Write-Host "Checking Dart version..."
-        dart --version
-        $dartVersion = dart --version
-        if (-not ($dartVersion -match "3.4.0")) {
-            Write-Error "Dart version 3.4.0 is required, but found: $dartVersion"
-            exit 1
-        }
-        Write-Host "Flutter and Dart versions verified successfully"
-    
-    - name: Install dependencies
-      run: |
-        Write-Host "Installing dependencies..."
-        flutter pub get
-        if ($LASTEXITCODE -ne 0) {
-          Write-Error "Failed to install dependencies"
-          exit 1
-        }
-        Write-Host "Dependencies installed successfully"
-    
-    - name: Build Windows app
-      run: flutter build windows --release
-    
-    - name: Setup MSIX packaging
-      run: |
-        Write-Host "Setting up MSIX packaging..."
-        flutter pub add msix
-        flutter pub get
-    
-    - name: Configure MSIX
-      run: |
-        Write-Host "Configuring MSIX..."
-        flutter pub run msix:create --display-name "Kaatje" --publisher-display-name "Your Publisher Name" --identity-name "com.yourdomain.kaatje" --publisher "CN=YourPublisherID" --logo "assets/images/icon.png" --version "1.0.0.0"
-    
-    - name: Create MSIX package
-      run: |
-        Write-Host "Creating MSIX package..."
-        flutter pub run msix:create
-    
+        docker run --rm -v ${PWD}:/app flutter-windows-builder
+
     - name: Upload MSIX package
       uses: actions/upload-artifact@v4
       with:
         name: windows-msix
-        path: build/windows/msix/*.msix
-    
-    - name: Upload Windows Build
-      uses: actions/upload-artifact@v4
-      with:
-        name: windows-build
-        path: build/windows/runner/Release/
-        if-no-files-found: error 
+        path: build/windows/msix/*.msix 
