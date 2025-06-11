@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/windows/servercore:ltsc2019
+FROM mcr.microsoft.com/windows:20H2
 
 # Set up Chocolatey
 RUN powershell -Command \
