@@ -6,36 +6,59 @@ on:
   pull_request:
     branches: [ main ]
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-
 jobs:
   build:
     runs-on: windows-latest
-    permissions:
-      contents: read
-      packages: write
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Log in to the Container registry
-      uses: docker/login-action@v3
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
       with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        flutter-version: '3.19.3'
+        channel: 'stable'
+        cache: true
 
-    - name: Build and push Docker image
+    - name: Configure Flutter
       run: |
-        $imageName = "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
-        docker build -t $imageName .
-        docker push $imageName
+        Write-Host "Configuring Flutter..."
+        flutter config --no-analytics
+        flutter config --no-cli-animations
 
-    - name: Run build in container
+    - name: Verify Flutter and Dart versions
       run: |
-        docker run --rm -v ${PWD}:/app ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+        Write-Host "Checking Flutter version..."
+        flutter --version
+        Write-Host "Checking Dart version..."
+        dart --version
+        $dartVersion = dart --version
+        if (-not ($dartVersion -match "3.4.0")) {
+            Write-Error "Dart version 3.4.0 is required, but found: $dartVersion"
+            exit 1
+        }
+
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Build Windows app
+      run: flutter build windows --release
+
+    - name: Setup MSIX packaging
+      run: |
+        Write-Host "Setting up MSIX packaging..."
+        flutter pub add msix
+        flutter pub get
+
+    - name: Configure MSIX
+      run: |
+        Write-Host "Configuring MSIX..."
+        flutter pub run msix:create --display-name "Kaatje" --publisher-display-name "Your Publisher Name" --identity-name "com.yourdomain.kaatje" --publisher "CN=YourPublisherID" --logo "assets/images/icon.png" --version "1.0.0.0"
+
+    - name: Create MSIX package
+      run: |
+        Write-Host "Creating MSIX package..."
+        flutter pub run msix:create
 
     - name: Upload MSIX package
       uses: actions/upload-artifact@v4
