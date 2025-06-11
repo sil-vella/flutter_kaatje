@@ -22,6 +22,11 @@ jobs:
         cache: true
         cache-key: flutter-windows-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
     
+    - name: Verify Flutter and Dart versions
+      run: |
+        flutter --version
+        dart --version
+    
     - name: Install dependencies
       run: flutter pub get
     
