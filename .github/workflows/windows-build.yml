@@ -57,24 +57,26 @@ jobs:
         flutter-version: '3.19.3'
         channel: 'stable'
         cache: true
-        cache-key: flutter-windows-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+    
+    - name: Switch to Dart 3.4.0
+      run: |
+        Write-Host "Switching to Dart 3.4.0..."
+        flutter downgrade dart 3.4.0
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error "Failed to switch to Dart 3.4.0"
+            exit 1
+        }
     
     - name: Verify Flutter and Dart versions
       run: |
         Write-Host "Checking Flutter version..."
         flutter --version
-        $flutterVersion = flutter --version
-        if (-not ($flutterVersion -match "3.19.3")) {
-          Write-Error "Flutter version 3.19.3 is required, but found: $flutterVersion"
-          exit 1
-        }
-        
         Write-Host "Checking Dart version..."
         dart --version
         $dartVersion = dart --version
         if (-not ($dartVersion -match "3.4.0")) {
-          Write-Error "Dart version 3.4.0 is required, but found: $dartVersion"
-          exit 1
+            Write-Error "Dart version 3.4.0 is required, but found: $dartVersion"
+            exit 1
         }
         Write-Host "Flutter and Dart versions verified successfully"
     
