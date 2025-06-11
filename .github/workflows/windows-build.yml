@@ -14,30 +14,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: Install Dart SDK
-      run: |
-        $dartUrl = "https://storage.googleapis.com/dart-archive/channels/stable/release/3.4.0/sdk/dartsdk-windows-x64-release.zip"
-        Write-Host "Downloading Dart SDK from: $dartUrl"
-        Invoke-WebRequest -Uri $dartUrl -OutFile "dart-sdk.zip"
-        Write-Host "Extracting Dart SDK..."
-        Expand-Archive -Path "dart-sdk.zip" -DestinationPath "C:\dart-sdk" -Force
-        $dartPath = "C:\dart-sdk\dart-sdk\bin"
-        [System.Environment]::SetEnvironmentVariable("Path", $dartPath + ";" + [System.Environment]::GetEnvironmentVariable("Path", [System.EnvironmentVariableTarget]::Process), [System.EnvironmentVariableTarget]::Machine)
-        echo "$dartPath" >> $env:GITHUB_PATH
-        Write-Host "Added Dart SDK path: $dartPath"
-    
-    - name: Verify Dart SDK Installation
-      run: |
-        Write-Host "Current PATH: $env:Path"
-        Write-Host "Checking Dart version..."
-        dart --version
-        $dartVersion = dart --version
-        if (-not ($dartVersion -match "3.4.0")) {
-          Write-Error "Dart version 3.4.0 is required, but found: $dartVersion"
-          exit 1
-        }
-        Write-Host "Dart SDK installation verified successfully"
-    
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
@@ -46,7 +22,7 @@ jobs:
         cache: true
         cache-key: flutter-windows-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
     
-    - name: Verify Flutter version
+    - name: Verify Flutter and Dart versions
       run: |
         Write-Host "Checking Flutter version..."
         flutter --version
@@ -55,7 +31,15 @@ jobs:
           Write-Error "Flutter version 3.19.3 is required, but found: $flutterVersion"
           exit 1
         }
-        Write-Host "Flutter installation verified successfully"
+        
+        Write-Host "Checking Dart version..."
+        dart --version
+        $dartVersion = dart --version
+        if (-not ($dartVersion -match "3.4.0")) {
+          Write-Error "Dart version 3.4.0 is required, but found: $dartVersion"
+          exit 1
+        }
+        Write-Host "Flutter and Dart versions verified successfully"
     
     - name: Install dependencies
       run: |
