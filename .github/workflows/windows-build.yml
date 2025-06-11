@@ -54,18 +54,9 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.19.3'
+        flutter-version: '3.16.9'  # This version includes Dart 3.4.0
         channel: 'stable'
         cache: true
-    
-    - name: Upgrade Flutter to get Dart 3.4.0
-      run: |
-        Write-Host "Upgrading Flutter to get Dart 3.4.0..."
-        flutter upgrade
-        if ($LASTEXITCODE -ne 0) {
-            Write-Error "Failed to upgrade Flutter"
-            exit 1
-        }
     
     - name: Verify Flutter and Dart versions
       run: |
