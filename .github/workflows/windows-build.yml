@@ -14,26 +14,24 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: Install Chocolatey
-      run: |
-        Set-ExecutionPolicy Bypass -Scope Process -Force
-        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-        iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-    
     - name: Install Dart SDK
       run: |
-        choco install dart-sdk --version=3.4.0 -y
-        $dartPath = "$env:ChocolateyInstall\lib\dart-sdk\tools"
+        $dartUrl = "https://storage.googleapis.com/dart-archive/channels/stable/release/3.4.0/sdk/dartsdk-windows-x64-release.zip"
+        Write-Host "Downloading Dart SDK from: $dartUrl"
+        Invoke-WebRequest -Uri $dartUrl -OutFile "dart-sdk.zip"
+        Write-Host "Extracting Dart SDK..."
+        Expand-Archive -Path "dart-sdk.zip" -DestinationPath "C:\dart-sdk" -Force
+        $dartPath = "C:\dart-sdk\dart-sdk\bin"
         echo "$dartPath" >> $env:GITHUB_PATH
-        echo "Added Dart SDK path: $dartPath"
+        Write-Host "Added Dart SDK path: $dartPath"
     
     - name: Verify Dart SDK Installation
       run: |
-        if (!(Test-Path "$env:ChocolateyInstall\lib\dart-sdk\tools\dart.exe")) {
+        if (!(Test-Path "C:\dart-sdk\dart-sdk\bin\dart.exe")) {
           Write-Error "Dart executable not found in expected path."
-          Get-ChildItem "$env:ChocolateyInstall\lib\dart-sdk" -Recurse | Where-Object { $_.Name -eq "dart.exe" } | ForEach-Object { Write-Output "Found dart.exe at: $($_.FullName)" }
+          Get-ChildItem "C:\dart-sdk" -Recurse | Where-Object { $_.Name -eq "dart.exe" } | ForEach-Object { Write-Output "Found dart.exe at: $($_.FullName)" }
         } else {
-          Write-Output "Dart SDK installed successfully at: $env:ChocolateyInstall\lib\dart-sdk\tools\dart.exe"
+          Write-Output "Dart SDK installed successfully at: C:\dart-sdk\dart-sdk\bin\dart.exe"
         }
     
     - name: Verify Dart version
