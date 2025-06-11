@@ -22,26 +22,21 @@ jobs:
         Write-Host "Extracting Dart SDK..."
         Expand-Archive -Path "dart-sdk.zip" -DestinationPath "C:\dart-sdk" -Force
         $dartPath = "C:\dart-sdk\dart-sdk\bin"
+        [System.Environment]::SetEnvironmentVariable("Path", $dartPath + ";" + [System.Environment]::GetEnvironmentVariable("Path", [System.EnvironmentVariableTarget]::Process), [System.EnvironmentVariableTarget]::Machine)
         echo "$dartPath" >> $env:GITHUB_PATH
         Write-Host "Added Dart SDK path: $dartPath"
     
     - name: Verify Dart SDK Installation
       run: |
-        if (!(Test-Path "C:\dart-sdk\dart-sdk\bin\dart.exe")) {
-          Write-Error "Dart executable not found in expected path."
-          Get-ChildItem "C:\dart-sdk" -Recurse | Where-Object { $_.Name -eq "dart.exe" } | ForEach-Object { Write-Output "Found dart.exe at: $($_.FullName)" }
-        } else {
-          Write-Output "Dart SDK installed successfully at: C:\dart-sdk\dart-sdk\bin\dart.exe"
-        }
-    
-    - name: Verify Dart version
-      run: |
+        Write-Host "Current PATH: $env:Path"
+        Write-Host "Checking Dart version..."
         dart --version
         $dartVersion = dart --version
         if (-not ($dartVersion -match "3.4.0")) {
           Write-Error "Dart version 3.4.0 is required, but found: $dartVersion"
           exit 1
         }
+        Write-Host "Dart SDK installation verified successfully"
     
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
@@ -53,20 +48,24 @@ jobs:
     
     - name: Verify Flutter version
       run: |
+        Write-Host "Checking Flutter version..."
         flutter --version
         $flutterVersion = flutter --version
         if (-not ($flutterVersion -match "3.19.3")) {
           Write-Error "Flutter version 3.19.3 is required, but found: $flutterVersion"
           exit 1
         }
+        Write-Host "Flutter installation verified successfully"
     
     - name: Install dependencies
       run: |
+        Write-Host "Installing dependencies..."
         flutter pub get
         if ($LASTEXITCODE -ne 0) {
           Write-Error "Failed to install dependencies"
           exit 1
         }
+        Write-Host "Dependencies installed successfully"
     
     - name: Build Windows App
       run: flutter build windows --release
