@@ -1,0 +1,6 @@
+display_name: Kaatje
+publisher_display_name: Your Publisher Name
+identity_name: com.yourdomain.kaatje
+msix_version: 1.0.0.0
+logo_path: assets/images/icon.png
+capabilities: internetClient 

@@ -32,7 +32,7 @@ jobs:
       - name: Create MSIX package
         run: |
           flutter pub add msix
-          flutter pub run msix:create --display-name "Kaatje" --publisher-display-name "Your Publisher Name" --identity-name "com.yourdomain.kaatje" --publisher "CN=YourPublisherID" --icon "assets/images/icon.png" --version "1.0.0.0" --skip-certificate-check
+          flutter pub run msix:create --skip-certificate-check
           
       - name: Upload MSIX package
         uses: actions/upload-artifact@v4
