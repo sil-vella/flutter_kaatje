@@ -1,4 +1,4 @@
-name: Build Windows App
+name: Windows Build
 
 on:
   push:
@@ -24,7 +24,10 @@ jobs:
       run: |
         Write-Host "Installing Dart SDK version 3.4.0..."
         choco install dart-sdk --version=3.4.0 -y
-        $dartPath = "$env:ChocolateyInstall\lib\dart-sdk\tools"
+        refreshenv
+        
+        # Set the correct Dart SDK path
+        $dartPath = "C:\tools\dart-sdk\bin"
         
         # Add Dart SDK path to the current session and system PATH
         $env:Path = "$dartPath;$env:Path"
@@ -34,6 +37,13 @@ jobs:
         
         # Verify Dart installation
         if (!(Get-Command dart -ErrorAction SilentlyContinue)) {
+            Write-Host "Current PATH: $env:Path"
+            Write-Host "Checking if dart.exe exists at $dartPath"
+            if (Test-Path "$dartPath\dart.exe") {
+                Write-Host "dart.exe found at $dartPath"
+            } else {
+                Write-Host "dart.exe not found at $dartPath"
+            }
             Write-Error "Dart command not found after installation."
             exit 1
         }
