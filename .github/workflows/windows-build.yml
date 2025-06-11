@@ -54,8 +54,8 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.19.0-4.0.pre'  # This version includes Dart 3.4.0
-        channel: 'beta'  # Using beta channel for this specific version
+        flutter-version: '3.19.0'  # Using a valid beta version
+        channel: 'beta'
         cache: true
     
     - name: Configure Flutter
