@@ -14,6 +14,14 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
+    - name: Install Dart SDK
+      run: |
+        choco install dart-sdk --version=3.4.0 -y
+        echo "$env:ChocolateyInstall\bin" >> $env:GITHUB_PATH
+    
+    - name: Verify Dart version
+      run: dart --version
+    
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
@@ -22,10 +30,8 @@ jobs:
         cache: true
         cache-key: flutter-windows-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
     
-    - name: Verify Flutter and Dart versions
-      run: |
-        flutter --version
-        dart --version
+    - name: Verify Flutter version
+      run: flutter --version
     
     - name: Install dependencies
       run: flutter pub get
