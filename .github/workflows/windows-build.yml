@@ -35,7 +35,13 @@ jobs:
         }
     
     - name: Verify Dart version
-      run: dart --version
+      run: |
+        dart --version
+        $dartVersion = dart --version
+        if (-not ($dartVersion -match "3.4.0")) {
+          Write-Error "Dart version 3.4.0 is required, but found: $dartVersion"
+          exit 1
+        }
     
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
@@ -46,10 +52,21 @@ jobs:
         cache-key: flutter-windows-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
     
     - name: Verify Flutter version
-      run: flutter --version
+      run: |
+        flutter --version
+        $flutterVersion = flutter --version
+        if (-not ($flutterVersion -match "3.19.3")) {
+          Write-Error "Flutter version 3.19.3 is required, but found: $flutterVersion"
+          exit 1
+        }
     
     - name: Install dependencies
-      run: flutter pub get
+      run: |
+        flutter pub get
+        if ($LASTEXITCODE -ne 0) {
+          Write-Error "Failed to install dependencies"
+          exit 1
+        }
     
     - name: Build Windows App
       run: flutter build windows --release
