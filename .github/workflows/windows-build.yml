@@ -58,12 +58,12 @@ jobs:
         channel: 'stable'
         cache: true
     
-    - name: Switch to Flutter version with Dart 3.4.0
+    - name: Upgrade Flutter to get Dart 3.4.0
       run: |
-        Write-Host "Switching to Flutter version with Dart 3.4.0..."
-        flutter version 3.19.3
+        Write-Host "Upgrading Flutter to get Dart 3.4.0..."
+        flutter upgrade
         if ($LASTEXITCODE -ne 0) {
-            Write-Error "Failed to switch Flutter version"
+            Write-Error "Failed to upgrade Flutter"
             exit 1
         }
     
