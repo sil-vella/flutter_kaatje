@@ -58,12 +58,12 @@ jobs:
         channel: 'stable'
         cache: true
     
-    - name: Switch to Dart 3.4.0
+    - name: Switch to Flutter version with Dart 3.4.0
       run: |
-        Write-Host "Switching to Dart 3.4.0..."
-        flutter downgrade dart 3.4.0
+        Write-Host "Switching to Flutter version with Dart 3.4.0..."
+        flutter version 3.19.3
         if ($LASTEXITCODE -ne 0) {
-            Write-Error "Failed to switch to Dart 3.4.0"
+            Write-Error "Failed to switch Flutter version"
             exit 1
         }
     
@@ -90,7 +90,7 @@ jobs:
         }
         Write-Host "Dependencies installed successfully"
     
-    - name: Build Windows App
+    - name: Build Windows app
       run: flutter build windows --release
     
     - name: Upload Windows Build
