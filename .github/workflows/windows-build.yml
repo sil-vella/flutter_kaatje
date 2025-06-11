@@ -12,7 +12,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Install Chocolatey
       run: |
@@ -25,8 +25,11 @@ jobs:
         Write-Host "Installing Dart SDK version 3.4.0..."
         choco install dart-sdk --version=3.4.0 -y
         $dartPath = "$env:ChocolateyInstall\lib\dart-sdk\tools"
-        [System.Environment]::SetEnvironmentVariable("Path", "$dartPath;$env:GITHUB_PATH", [System.EnvironmentVariableTarget]::Machine)
-        echo "$dartPath" >> $env:GITHUB_PATH
+        
+        # Add Dart SDK path to the current session and system PATH
+        $env:Path = "$dartPath;$env:Path"
+        [System.Environment]::SetEnvironmentVariable("Path", "$dartPath;$env:Path", [System.EnvironmentVariableTarget]::Machine)
+        
         Write-Host "Added Dart SDK path: $dartPath"
         
         # Verify Dart installation
