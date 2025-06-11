@@ -11,29 +11,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Set up Flutter
-        uses: dart-lang/setup-dart@v1
+      - uses: dart-lang/setup-dart@v1
         with:
-          sdk: '3.4.0'
+          version: '3.4.0'
           
-      - name: Install Flutter
-        uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.19.0'
           channel: 'stable'
           cache: true
-          cache-key: 'flutter-windows-3.19.0-'
+          cache-key: flutter-windows-3.19.0-
           
       - name: Cache Pub dependencies
         uses: actions/cache@v4
         with:
-          path: |
-            **/pubspec.lock
-            .dart_tool/
-            .pub-cache/
-          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          path: ${{ env.PUB_CACHE }}
+          key: Windows-pub-${{ hashFiles('**/pubspec.lock') }}
           restore-keys: |
-            ${{ runner.os }}-pub-
+            Windows-pub-
             
       - name: Install dependencies
         run: flutter pub get
@@ -45,4 +40,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: windows-app
-          path: build/windows/runner/Release/*.exe 
+          path: build/windows/x64/runner/Release/*.exe 
